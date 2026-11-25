@@ -1,0 +1,28 @@
+# Node
+node_modules/
+frontend/node_modules/
+frontend/dist/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.env
+backend/.env
+.venv/
+venv/
+ENV/
+
+# Database & local data
+*.db
+*.sqlite3
+backend/jobs_app.db
+jobs_app.db
+backend/uploads/
+uploads/
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
