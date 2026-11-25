@@ -23,7 +23,8 @@ import {
   ArrowUpDown,
   ExternalLink,
   GraduationCap,
-  Award
+  Award,
+  Bot
 } from 'lucide-react';
 import { api } from './services/api';
 
@@ -81,6 +82,8 @@ export default function App() {
   const [currentDraftAppId, setCurrentDraftAppId] = useState(null);
   const [showHistory, setShowHistory] = useState(false);
   const [drafting, setDrafting] = useState(false);
+  const [crewAdvice, setCrewAdvice] = useState(null);
+  const [loadingCrew, setLoadingCrew] = useState(false);
   const [editAppId, setEditAppId] = useState(null);
   const [recipientEmail, setRecipientEmail] = useState('');
   const [emailSubject, setEmailSubject] = useState('');
@@ -255,6 +258,19 @@ export default function App() {
   };
 
   // Unified "Confirm Filters" handler - applies Flipkart style combination of all selected criteria
+  const handleFetchCrewAIAdvice = async () => {
+    if (!candidate) return;
+    setLoadingCrew(true);
+    try {
+      const res = await api.getCrewAIAdvice(candidate.id, selectedRole || 'Software Engineer');
+      setCrewAdvice(res.data);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingCrew(false);
+    }
+  };
+
   const handleConfirmFilters = () => {
     // 1. Determine effective role
     const finalRole = draftRole;
@@ -516,6 +532,33 @@ export default function App() {
                     <strong className="text-brand-700">Resume Summary:</strong> {candidate.summary}
                   </div>
                 )}
+
+                {/* Optional CrewAI Integration: Career Coach Agent */}
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                      <Bot size={15} className="text-purple-600" />
+                      CrewAI Agent: Technical Career Coach
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleFetchCrewAIAdvice}
+                      disabled={loadingCrew}
+                      className="text-[11px] font-bold text-purple-700 bg-purple-100 hover:bg-purple-200 px-3 py-1 rounded-lg transition flex items-center gap-1 cursor-pointer"
+                    >
+                      <Sparkles size={12} />
+                      {loadingCrew ? "Agent Running..." : "Run CrewAI Review"}
+                    </button>
+                  </div>
+                  {crewAdvice && (
+                    <div className="text-xs text-slate-700 bg-white border border-purple-100 p-2.5 rounded-lg whitespace-pre-line leading-relaxed">
+                      <div className="font-semibold text-purple-800 text-[11px] mb-1">
+                        Agent Goal: {crewAdvice.agent_goal || "Strategic Interview Preparation"}
+                      </div>
+                      {crewAdvice.recommendations}
+                    </div>
+                  )}
+                </div>
 
                 {/* Proceed Button */}
                 <div className="pt-2 flex items-center justify-between">

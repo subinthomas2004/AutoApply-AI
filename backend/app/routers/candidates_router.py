@@ -9,6 +9,7 @@ from app.models.db_models import Candidate
 from app.models.schemas import CandidateOut
 from app.services.cv_parser import extract_text_from_file
 from app.services.ai_engine import analyze_cv_with_ai
+from app.services.crewai_service import run_crewai_career_review
 from app.config import settings
 
 router = APIRouter(prefix="/candidates", tags=["candidates"])
@@ -69,3 +70,19 @@ async def upload_candidate_cv(
     db.refresh(new_candidate)
 
     return new_candidate
+
+@router.get("/{candidate_id}/crewai-advice")
+def get_crewai_candidate_advice(candidate_id: int, target_role: Optional[str] = "Software Engineer", db: Session = Depends(get_db)):
+    """
+    CrewAI Integration Endpoint: Orchestrates a multi-agent style career coach review.
+    """
+    cand = db.query(Candidate).filter(Candidate.id == candidate_id).first()
+    if not cand:
+        raise HTTPException(status_code=404, detail="Candidate not found")
+    
+    advice = run_crewai_career_review(
+        candidate_name=cand.full_name,
+        skills=cand.extracted_skills or "Software Engineering",
+        target_role=target_role
+    )
+    return advice

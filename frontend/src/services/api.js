@@ -12,6 +12,7 @@ export const api = {
   uploadCV: (formData) => axios.post(`${API_BASE}/candidates/upload`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
+  getCrewAIAdvice: (candidateId, role) => axios.get(`${API_BASE}/candidates/${candidateId}/crewai-advice?target_role=${encodeURIComponent(role || 'Software Engineer')}`),
 
   // Jobs
   getJobs: () => axios.get(`${API_BASE}/jobs/`),
